@@ -7,6 +7,18 @@ library(easypackages)
 pqt<- c("googlesheets4","gargle", "tidyverse","lubridate", "janitor","formattable", "openxlsx","readxl", "stringr")
 libraries(pqt)
 
+#Creamos rutas para no exceder la ruta de los archivos
+ruta_DataInput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data/2022/"
+ruta_BolOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/"
+ruta_DatOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/Data/"
+ruta_descargas<- "C:/Users/jach_/Downloads/"
+
+#Pegamos las direcciones cortas
+load(paste0(ruta_DataInput,"Doc_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Acc_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Inf_Enero_2022.RData"))
+
+
 #Usuario
 gs4_user()
 
@@ -55,9 +67,9 @@ gs4_deauth()
 #OD para Boletin
 
 
+#Guardamos una copia en las descargas
 
-#od_inf<- read_excel("C:/Users/jach_/Downloads/Consolidado_Informes_OD_13.02.2022.xlsx", sheet = "INAF_1")
-
+save(od_inf, file = paste0(ruta_descargas,"od_inf_enero.Rdata"))
 
 
 INF_OD_BOLETIN <- od_inf %>% mutate(COMPET= if_else(str_detect(COMPETENCIA,"RESIDUOS|INTEGRALES"), "OD_RES","OD_HID")) %>%
@@ -68,19 +80,9 @@ INF_OD_BOLETIN<- INF_OD_BOLETIN %>%
   mutate(INFORME = if_else(str_detect(INFORME,"0006-2022-OEFA/ODES-APU"),"00006-2022-OEFA/ODES-APU",INFORME))
 
 
-
-
-
-setwd("C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data/2022/") #Cambiar
-#Seleccionar Ruta de trabajo
-load("Inf_Enero_2022.RData")
-load("Acc_Enero_2022.RData")
-load("Doc_Enero_2022.RData")
-
-
 #Meses Evaluados
-EVALUACION<- "ENERO|FEBRERO"#|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SETIEMBRE|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE"
-EVALUACION<- as.Date("2022-02-28")
+#EVALUACION<- "ENERO|FEBRERO"#|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SETIEMBRE|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE"
+EVALUACION<- as.Date("2022-01-31")
 
 
 
@@ -187,8 +189,8 @@ INF_OD_CONSOL_BOLETIN <- INF_OD_CONSOL_BOLETIN %>%
   
 
 #-------------------Guardamos la data--------------
-save(INF_OD_CONSOL_BOLETIN, file = "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/Data/ODInf_Febrero_2022.RData")
-load("ODInf_Febrero_2022.RData")
+save(INF_OD_CONSOL_BOLETIN, file = paste0(ruta_DatOutput,"ODInf_Febrero_2022.RData"))
+load(paste0(ruta_DatOutput,"ODInf_Febrero_2022.RData"))
 
 if(3==3){
   #-------CANTIDAD DE INFORMES
@@ -287,7 +289,7 @@ if(3==3){
 #library(xlsx)
 
 if(4==4){
-  setwd("C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022")
+  
   #Creamos Libro
   #-------------------------------
   wb<- createWorkbook()
@@ -340,7 +342,7 @@ if(4==4){
   
   #Guarda
   #---------
-  saveWorkbook(wb, "ODInformes_Enero_2022.xlsx", overwrite = TRUE)
+  saveWorkbook(wb, paste0(ruta_BolOutput,"ODInformes_Enero_2022.xlsx"), overwrite = TRUE)
 }
 
 
