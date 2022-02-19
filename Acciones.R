@@ -6,12 +6,12 @@ library(easypackages)
 pqt<- c("tidyverse","readxl", "openxlsx","lubridate","bizdays" ,"janitor", "knitr","formattable")
 libraries(pqt)
 #Guardamos la data===========
-setwd("C:/Users/jach_/OneDrive/Documentos/ShinyApp/Planefa2021/Diciembre2021/") 
+setwd("C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data/2022/") 
 #save(Informes_R,file = "Inf_Enero_2020.RData")
 #Cargamos la data de acciones y docuemntos
-load("Doc_Diciembre_2021.RData")
-load("Acc_Diciembre_2021.RData")
-load("Inf_Diciembre_2021.RData")
+load("Doc_Enero_2022.RData")
+load("Acc_Enero_2022.RData")
+load("Inf_Enero_2022.RData")
 # Revisión de carga de documentos.
 CargaDocs_R2 <- CargaDocs_R %>%
   #filter(FEFIN>=as.Date("2018-01-01"))%>%
@@ -25,7 +25,7 @@ CargaDocs_R2 <- CargaDocs_R %>%
 #ACCIONES E NFORMES DESDE 2018 ========================
 Acciones_R2 <- Acciones_R %>%
   filter(FEFIN >= as.Date("2021-01-01")  , 
-         FEFIN <=  as.Date("2021-12-31")) %>%
+         FEFIN <=  as.Date("2021-01-31")) %>%
   left_join(CargaDocs_R2) %>%
   #left_join(Informes_R) %>%
   mutate(
@@ -95,7 +95,7 @@ Acciones_R2 <- Acciones_R %>%
 #REGIONES DESAGREGADO===========================
 if("dpto"=="dpto"){
   Acc_tem<- Acciones_R2 %>%
-    filter(ACC_EJEC==1) %>%
+    filter(ACC_CLEAN==1) %>%
     distinct(DIREC,TXMES,COORD,TXCUC,TXUBIGEO_UND)
   temp<- as.data.frame(str_split(Acc_tem$TXUBIGEO_UND," / ",simplify = TRUE))
   Acc_tem1 <- cbind(Acc_tem,temp)
@@ -113,7 +113,7 @@ if("dpto"=="dpto"){
 #ACTIVIDADES DESAGREGADO===========================
 if("Activ"=="Activ"){
   Acc_tem<- Acciones_R2 %>%
-    filter(ACC_EJEC==1) %>%
+    filter(ACC_CLEAN==1) %>%
     distinct(DIREC,TXMES,COORD,TXCUC,TXACTIVIDAD_UND)
   temp<- as.data.frame(str_split(Acc_tem$TXACTIVIDAD_UND," / ",simplify = TRUE))
   Acc_tem1 <- cbind(Acc_tem,temp)
@@ -135,7 +135,7 @@ if(3==3) {
   #Acciones ejecutadas =========================
   ACC_EJECUTADAS<- Acciones_R2 %>%
     distinct(TXCUC, .keep_all = TRUE) %>%
-    filter(ACC_EJEC==1) %>%
+    filter(ACC_CLEAN==1) %>%
     mutate(COORD = factor(COORD,levels = c("MIN","HID","ELE","IND","PES","AGR","CAM","RES","OD_HID","OD_RES")))%>%
     group_by(#TRIM,TXMES,
       TXTIPSUP, TXACCION, COORD) %>% 
@@ -151,7 +151,7 @@ if(3==3) {
   #Acciones por tipo de supervisión y tipo de acción=====================================
   ACC_EJEC_TIPO<-Acciones_R2 %>%
     distinct(TXCUC, .keep_all = TRUE) %>%
-    filter(ACC_EJEC==1)%>%
+    filter(ACC_CLEAN==1)%>%
     mutate(COORD = factor(COORD,levels = c("MIN","HID","ELE","IND","PES","AGR","CAM","RES","OD_HID","OD_RES")))%>%
     mutate(TXACCION= case_when(
       TXACCION=="PRESENCIAL" ~ "IN SITU",
@@ -171,7 +171,7 @@ if(3==3) {
   #Acciones orientativas===========================
   ACC_EJEC_ORIENTA<- Acciones_R2 %>%
     distinct(TXCUC, .keep_all = TRUE) %>%
-    filter(ACC_EJEC==1) %>%
+    filter(ACC_CLEAN==1) %>%
     mutate(COORD = factor(COORD,levels = c("MIN","HID","ELE","IND","PES","AGR","CAM","RES","OD_HID","OD_RES")))%>%
     mutate(
       FGSUP_ORIENTATIVA=case_when(
@@ -206,7 +206,7 @@ if(3==3) {
   #Acciones por admnistrado y unidad fiscalizable ============================
   ACC_EJEC_ADMIN<-Acciones_R2 %>%
     distinct(TXCUC, .keep_all = TRUE) %>%
-    filter(ACC_EJEC==1) %>%
+    filter(ACC_CLEAN==1) %>%
     mutate(IDADMINISTRADO = if_else(str_detect(TXADMINISTRADO_ADM,"NO DETERMINADO"),"",IDADMINISTRADO)) %>%
     distinct(COORD, IDADMINISTRADO, IDUF_SIG, .keep_all = TRUE) %>% #Trimestre
     group_by(COORD)%>% #Trimestral
@@ -223,7 +223,7 @@ if(3==3) {
   #Acciones por fuente==============================================
   ACC_EJEC_FUENTE<-  Acciones_R2 %>%
     distinct(TXCUC, .keep_all = TRUE) %>%
-    filter(ACC_EJEC==1)%>%
+    filter(ACC_CLEAN==1)%>%
     mutate(COORD = factor(COORD,levels = c("MIN","HID","ELE","IND","PES","AGR","CAM","RES","OD_HID","OD_RES")))%>%
     group_by(#TRIM, DIREC,
              TXFUENTE,COORD)%>%
@@ -269,7 +269,7 @@ if(3==3) {
   TOTAL_SUP<- Acciones_R2 %>%
     mutate(COORD = factor(COORD,levels = c("MIN","HID","ELE","IND","PES","AGR","CAM","RES","OD_HID","OD_RES")))%>%
     distinct(TXCUC, .keep_all = TRUE) %>%
-    filter(ACC_EJEC==1) %>%
+    filter(ACC_CLEAN==1) %>%
     mutate(ANO_EXP= parse_number(str_extract(TXNUMEXP,"(?<=-)[0-9]+"))) %>% #precedido de - 
     group_by(TXNUMEXP) %>%
     filter(FEINICIO== min(as.Date(FEINICIO))) %>%
@@ -296,9 +296,7 @@ if(3==3) {
 
 #Exportamos reporte Boletin=============
 if(5==5){
-  #setwd("Y:/Sistematización y Gestión de Procesos/33. Informacion Consolidada CSEP/REPORTE/BOLETIN/2020/")
-  #setwd("C:/Users/JHON/Documents/OEFA/Outputs/Boletin/")
-  setwd("C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/")
+  setwd("C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022")
   #Creamos Libro
   wb<- createWorkbook()
   modifyBaseFont(wb,fontSize = 10,fontName = "calibri", fontColour = "blue") # Solamente Aplica para writeData
@@ -309,7 +307,7 @@ if(5==5){
   addWorksheet(wb,"Acciones_Activid", gridLines = FALSE)
   addWorksheet(wb, "Reporte_Meta", gridLines = FALSE)
   #Tabla 1.0
-  #writeDataTable(wb,"Acciones", Acciones_R2,startRow = 1 ,startCol = "A")
+  writeDataTable(wb,"Acciones", Acciones_R2,startRow = 1 ,startCol = "A")
   #Tabla 1.1
   writeDataTable(wb,"Acciones_Regiones", Acciones_Dpto,startRow = 1 ,startCol = "A")
   #Tabla 1.1
@@ -324,7 +322,7 @@ if(5==5){
   writeDataTable(wb,"Reporte_Meta", TOTAL_SUP,startRow = 68 ,startCol = "A")
   
   #Guardamos data
-  saveWorkbook(wb, "Acciones_Diciembre2021.xlsx", overwrite = TRUE)
+  saveWorkbook(wb, "Acciones_Enero_2022.xlsx", overwrite = TRUE)
 }
 
-write.csv(Acciones_R2,file = "Acciones_Diciembre2021a.csv", row.names = TRUE, na="")
+#write.csv(Acciones_R2,file = "Acciones_Diciembre2021a.csv", row.names = TRUE, na="")
