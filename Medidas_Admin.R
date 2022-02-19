@@ -3,6 +3,17 @@ library(easypackages)
 pqt<- c("googlesheets4","gargle", "tidyverse","lubridate", "janitor","knitr","formattable","bizdays" , "openxlsx","readxl", "stringr")
 libraries(pqt)
 
+#Creamos rutas para no exceder la ruta de los archivos
+ruta_DataInput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data/2022/"
+ruta_BolOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/"
+ruta_DatOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/Data/"
+ruta_descargas<- "C:/Users/jach_/Downloads/"
+
+#Pegamos las direcciones cortas
+load(paste0(ruta_DataInput,"Doc_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Acc_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Inf_Enero_2022.RData"))
+
 #Usuario
 gs4_user()
 
@@ -40,7 +51,7 @@ file.list<- list("")
 for(i in 1:8){
   file.list[[i]]<- as.data.frame(read_sheet(ss=archivos$id[i],
                                             sheet = "Base Medidas",
-                                            range = "A2:CG2000",
+                                            range = "A2:CG",
                                             #skip = 1,
                                             col_types = "icccccccDDcccDicccccccccciiiiiiicDccDDcDccDcccDccDcDcccDcDcDcDccDcccccccccccicDiicccD"))
 } #Hasta CRES
@@ -84,8 +95,6 @@ MEDIDAS_ADM<- MEDIDAS_ADM %>%
     DOCUMENTO = "",
     PUBLICAR  = "",
     FECHA_ACTUAL = today())
-#07--CARGA INAPS----
-load("Diciembre2021/Acc_Diciembre_2021.RData") #Cambiar según el mes
 
 #08--NUEVA BD MERGE CON INAPS----
 MEDIDAS_ADM2<- MEDIDAS_ADM %>% left_join(Acciones_R, by=c("CUC" = "TXCUC"))
@@ -98,11 +107,11 @@ MEDIDAS_ADM2<- MEDIDAS_ADM2 %>%
   select(ID:FECHA_ACTUAL)
 
 #10--GUARDAMOS LA BD FINAL----
-save(MEDIDAS_ADM2, file = "Diciembre2021/Med_Diciembre_2021.RData")
-load("Diciembre2021/Med_Diciembre_2021.RData")
+save(MEDIDAS_ADM2, file = paste0(ruta_DatOutput,"Med_Enero_2022.RData"))
+load(paste0(ruta_DatOutput,"Med_Enero_2022.RData"))
 
 #Meses Evaluados ========
-EVALUACION<- as.Date("2021-12-31")
+EVALUACION<- as.Date("2022-01-31")
 
 #11--REPORTE CSEP-----
 REP_CSEP<- MEDIDAS_ADM2 %>%
@@ -152,7 +161,7 @@ colnames(REP_CSIG)<- c("NRO","COD_MED","COD_OEFA","N_EXPEDIENTE","CUC","RUC","ME
                        "INTERP_RECURSO","MED_FIRME","RECONSIDERA","FEC_RECONSIDERA","RESOL_RECONSIDERA","APELACION","FEC_APELA","RESOL_TFA",
                        "REVOCA_CONFIR_NULA","OBS_COORD","PUBLICAR","FEC_ACTUAL")
 #EXPORTAR PARA CSIG------
-#write.xlsx(REP_CSIG,"C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/CSIG/BASE DE DATOS MEDIDAS ADMINISTRATIVAS - GENERAL 31.12.2021(CSIG).xlsx", startRow=1, colNames=TRUE)
+#write.xlsx(REP_CSIG,"C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/CSIG/BASE DE DATOS MEDIDAS ADMINISTRATIVAS - GENERAL 31.01.2022(CSIG).xlsx", startRow=1, colNames=TRUE)
 
 
 #---REPORTES PARA MEDIDAS ADMIN----
@@ -251,7 +260,7 @@ MA<- REP_CSEP %>%
   mutate(TIPO_DICTADO = case_when(
     str_detect(RESOL,"ACTA") &  str_detect(MED_DIC_EN,"CAMPO") ~ "ACTA",
     TRUE ~ "RESOL" )) %>%
-  filter(FECHA_RESOL>="2021-01-01",
+  filter(FECHA_RESOL>="2022-01-01",
          FECHA_RESOL<= EVALUACION,
          str_detect(ORIGEN_RESOL,"PRINCIPAL")) %>%
   group_by(SECTOR,TIPO_DICTADO) %>% 
@@ -260,7 +269,7 @@ MA<- REP_CSEP %>%
 
 MA %>% adorn_totals() %>% formattable()
 #Multas coercitivas
-MC<- MEDIDAS_ADM2 %>% filter(FECHA_RD_MULTA_COERCITIVA >="2021-01-01",
+MC<- MEDIDAS_ADM2 %>% filter(FECHA_RD_MULTA_COERCITIVA >="2022-01-01",
                              FECHA_RD_MULTA_COERCITIVA <= EVALUACION) %>%
   mutate(ANO=year(FECHA_RD_MULTA_COERCITIVA)) %>%
   group_by(#ANO,
@@ -268,7 +277,7 @@ MC<- MEDIDAS_ADM2 %>% filter(FECHA_RD_MULTA_COERCITIVA >="2021-01-01",
 
 MC %>% adorn_totals() %>% formattable()
 #Acta de Ejecución Forzosa
-EF<- MEDIDAS_ADM2 %>% filter(FECHA_ACTA_EJECUCION_FORZOSA >="2021-01-01",
+EF<- MEDIDAS_ADM2 %>% filter(FECHA_ACTA_EJECUCION_FORZOSA >="2022-01-01",
                              FECHA_ACTA_EJECUCION_FORZOSA <= EVALUACION) %>%
   mutate(ANO=year(FECHA_ACTA_EJECUCION_FORZOSA)) %>%
   group_by(#ANO,
@@ -276,7 +285,7 @@ EF<- MEDIDAS_ADM2 %>% filter(FECHA_ACTA_EJECUCION_FORZOSA >="2021-01-01",
 
 EF %>% adorn_totals() %>% formattable()
   
-AC<- ACUERDOS %>% filter(FEC_REUNION>="2021-01-01",
+AC<- ACUERDOS %>% filter(FEC_REUNION>="2022-01-01",
                          FEC_REUNION<= EVALUACION) %>%
   group_by(#ANO, 
            SECTOR) %>% summarise(AC=n_distinct(NRO_ACUERDO))
@@ -292,7 +301,6 @@ ESTRATEGIAS
 
 #---REPORTE EXCEL-------
 if(1==1){
-setwd("C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/")
 #Creamos Libro
 #-------------------------------
 wb<- createWorkbook()
@@ -360,7 +368,7 @@ writeDataTable(wb,"REPORTE", ESTRATEGIAS,
 addStyle(wb,sheet = "BD",style = s1 ,rows = c(1),cols = c(1:10))
 #Guarda
 #---------
-saveWorkbook(wb, "Medidas Administrativas_Diciembre2021.xlsx", overwrite = TRUE)
+saveWorkbook(wb, paste0(ruta_BolOutput,"Medidas_Enero_2022.xlsx"), overwrite = TRUE)
 
 }
 

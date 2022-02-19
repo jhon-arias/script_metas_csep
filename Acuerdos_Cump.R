@@ -3,6 +3,18 @@ library(easypackages)
 pqt<- c("googlesheets4","gargle", "tidyverse","lubridate", "janitor","knitr","formattable","bizdays" , "openxlsx","readxl", "stringr")
 libraries(pqt)
 
+#Creamos rutas para no exceder la ruta de los archivos
+ruta_DataInput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data/2022/"
+ruta_BolOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/"
+ruta_DatOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/Data/"
+ruta_descargas<- "C:/Users/jach_/Downloads/"
+
+#Pegamos las direcciones cortas
+load(paste0(ruta_DataInput,"Doc_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Acc_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Inf_Enero_2022.RData"))
+
+
 #Usuario
 gs4_user()
 
@@ -115,9 +127,8 @@ ADICIONALES<- bind_rows(file.list3) %>%
 
 
 #Guardamos la data
-setwd("C:/Users/jach_/OneDrive/Documentos/ShinyApp/Planefa2021/")
-save(ACUERDOS, file = "Diciembre2021/Acu_Diciembre_2021.RData")
-load("Diciembre2021/Acu_Diciembre_2021.RData")
+save(ACUERDOS, file = paste0(ruta_DatOutput,"Acu_Enero_2020.RData"))
+load(paste0(ruta_DatOutput,"Acu_Enero_2020.RData"))
 
 #Guardamos el reporte
 if(1==1){
@@ -139,6 +150,6 @@ if(1==1){
             , startRow = 1 ,startCol = "A", colNames = FALSE)
   writeDataTable(wb,"ADICIONAL",ADICIONALES,startRow = 2,startCol = "A")
   
-  saveWorkbook(wb, "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/Acuerdos Cumplimiento_Diciembre2021.xlsx", overwrite = TRUE)
+  saveWorkbook(wb, paste0(ruta_BolOutput,"Acuerdos_Enero_2022.xlsx"), overwrite = TRUE)
 }
 
