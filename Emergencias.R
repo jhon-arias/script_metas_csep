@@ -3,14 +3,21 @@ library(easypackages)
 pqt<- c("tidyverse","readxl", "openxlsx","lubridate","bizdays" ,"janitor", "knitr","formattable")
 libraries(pqt)
 #-----
+#Creamos rutas para no exceder la ruta de los archivos
+ruta_DataInput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data/2022/"
+ruta_BolOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/"
+ruta_DatOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/Data/"
+ruta_descargas<- "C:/Users/jach_/Downloads/"
 
-setwd("C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data2021/")
+#Pegamos las direcciones cortas
+load(paste0(ruta_DataInput,"Doc_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Acc_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Inf_Enero_2022.RData"))
 
-#Cargamos las acciones
-load("Diciembre/Acc_Diciembre_2021.RData")
-load("Diciembre/Emergencias_Diciembre_2021.RData")
+#Cargamos las emergencias
+load(paste0(ruta_DataInput,"Emergencias_Enero_2022.RData"))
 
-Evaluacion <- "2021-12-31" # Cambiar la fecha de corte
+Evaluacion <- "2022-01-31" # Cambiar la fecha de corte
 #--
 Emergencias<- Emergencias_R %>%
   left_join( Acciones_R %>% select(TXCOORDINACION, TXCUC) %>% rename("TX_ACCSUP"=TXCUC)) %>%
@@ -33,7 +40,7 @@ Emergencias<- Emergencias_R %>%
 
 #Reporte de INAF todas---------------
 Reporte_all<- Emergencias %>%
-  filter(FE_FECHA_FIN >= as.Date("2021-01-01")) %>% #Solo 2021
+  filter(FE_FECHA_FIN >= as.Date("2022-01-01")) %>% #Solo 2021
   group_by(TXCOORDINACION) %>%
   summarise(Acciones = n_distinct(TX_ACCSUP),
             Emergencias = n_distinct(TX_CODIGO)) %>% adorn_totals(c("row"))
@@ -42,7 +49,7 @@ Reporte_all
 
 #Reporte de INAF Inmediatas y de verificacion---------------
 Reporte_inmediatas<- Emergencias %>%
-  filter(FE_FECHA_FIN >= as.Date("2021-01-01"), #Solo 2021
+  filter(FE_FECHA_FIN >= as.Date("2022-01-01"), #Solo 2021
          str_detect(TX_TIPO_ATENCION, "VERIF"),
          str_detect(TX_VERIFICACION,"^INMEDIATA")) %>%
   group_by(TXCOORDINACION) %>%
@@ -114,7 +121,7 @@ if(1==1){
             , startRow = 15 ,startCol = "A", colNames = FALSE)
   writeDataTable(wb,"REPORTE",Reporte_inmediatas,startRow = 16,startCol = "A")
 
-  saveWorkbook(wb, "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/Emergencias_Diciembre2021.xlsx", overwrite = TRUE)
+  saveWorkbook(wb, paste0(ruta_BolOutput,"Emergencias_Enero_2022.xlsx"), overwrite = TRUE)
 }
 
 
