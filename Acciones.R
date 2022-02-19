@@ -5,13 +5,15 @@
 library(easypackages)
 pqt<- c("tidyverse","readxl", "openxlsx","lubridate","bizdays" ,"janitor", "knitr","formattable")
 libraries(pqt)
-#Guardamos la data===========
-setwd("C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data/2022/") 
-#save(Informes_R,file = "Inf_Enero_2020.RData")
+#Creamos rutas para no exceder la ruta de los archivos
+ruta_DataInput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data/2022/"
+ruta_BolOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/"
+ruta_DatOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/Data/"
+ruta_descargas<- "C:/Users/jach_/Downloads/"
 #Cargamos la data de acciones y docuemntos
-load("Doc_Enero_2022.RData")
-load("Acc_Enero_2022.RData")
-load("Inf_Enero_2022.RData")
+load(paste0(ruta_DataInput,"Doc_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Acc_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Inf_Enero_2022.RData"))
 # Revisión de carga de documentos.
 CargaDocs_R2 <- CargaDocs_R %>%
   #filter(FEFIN>=as.Date("2018-01-01"))%>%
@@ -322,7 +324,7 @@ if(5==5){
   writeDataTable(wb,"Reporte_Meta", TOTAL_SUP,startRow = 68 ,startCol = "A")
   
   #Guardamos data
-  saveWorkbook(wb, "Acciones_Enero_2022.xlsx", overwrite = TRUE)
+  saveWorkbook(wb, paste0(ruta_BolOutput,"Acciones_Enero_2022.xlsx"), overwrite = TRUE)
 }
 
 #write.csv(Acciones_R2,file = "Acciones_Diciembre2021a.csv", row.names = TRUE, na="")
