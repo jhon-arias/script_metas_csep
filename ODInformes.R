@@ -14,9 +14,9 @@ ruta_DatOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/D
 ruta_descargas<- "C:/Users/jach_/Downloads/"
 
 #Pegamos las direcciones cortas
-load(paste0(ruta_DataInput,"Doc_Enero_2022.RData"))
-load(paste0(ruta_DataInput,"Acc_Enero_2022.RData"))
-load(paste0(ruta_DataInput,"Inf_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Doc_Febrero_2022.RData"))
+load(paste0(ruta_DataInput,"Acc_Febrero_2022.RData"))
+load(paste0(ruta_DataInput,"Inf_Febrero_2022.RData"))
 
 
 #Usuario
@@ -29,7 +29,7 @@ gs4_auth(
 )
 
 #BUscar archivos con informacion 
-archivos<- gs4_find("POI 2022", n_max=500) %>% filter(!str_detect(name,"@|Copia|MODELO")) %>% arrange(name)
+archivos<- gs4_find("POI 2022", n_max=500) %>% filter(!str_detect(name,"@|Copia|MODELO|COORDINACIONES")) %>% arrange(name)
 
 #Confirmas permisos
 1
@@ -61,7 +61,7 @@ for(i in 15:30){
 OD1<- bind_rows(file.list1[1:14]) %>% mutate_if(is.character, function(x){str_to_upper(x)})
 OD2<- bind_rows(file.list2[15:29]) %>% mutate_if(is.character, function(x){str_to_upper(x)})
 #consolidamos la data
-od_inf<- bind_rows(OD1,OD2)
+OD_INF<- bind_rows(OD1,OD2)
 #Finalizar conexion
 gs4_deauth()
 #OD para Boletin
@@ -69,10 +69,10 @@ gs4_deauth()
 
 #Guardamos una copia en las descargas
 
-save(od_inf, file = paste0(ruta_descargas,"od_inf_enero.Rdata"))
+save(OD_INF, file = paste0(ruta_descargas,"OD_INF_Febrero_2022.Rdata"))
 
 
-INF_OD_BOLETIN <- od_inf %>% mutate(COMPET= if_else(str_detect(COMPETENCIA,"RESIDUOS|INTEGRALES"), "OD_RES","OD_HID")) %>%
+INF_OD_BOLETIN <- OD_INF %>% mutate(COMPET= if_else(str_detect(COMPETENCIA,"RESIDUOS|INTEGRALES"), "OD_RES","OD_HID")) %>%
   filter(!is.na(INFORME)) %>% mutate(INFORME = trimws(INFORME,which = c("both"),whitespace = "[ \t\r\n]"))
 
 #Correcciones
@@ -82,7 +82,7 @@ INF_OD_BOLETIN<- INF_OD_BOLETIN %>%
 
 #Meses Evaluados
 #EVALUACION<- "ENERO|FEBRERO"#|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SETIEMBRE|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE"
-EVALUACION<- as.Date("2022-01-31")
+EVALUACION<- as.Date("2022-02-28")
 
 
 
@@ -342,7 +342,7 @@ if(4==4){
   
   #Guarda
   #---------
-  saveWorkbook(wb, paste0(ruta_BolOutput,"ODInformes_Enero_2022.xlsx"), overwrite = TRUE)
+  saveWorkbook(wb, paste0(ruta_BolOutput,"ODInformes_Febrero_2022.xlsx"), overwrite = TRUE)
 }
 
 

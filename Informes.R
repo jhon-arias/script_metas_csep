@@ -14,14 +14,20 @@ ruta_DatOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/D
 ruta_descargas<- "C:/Users/jach_/Downloads/"
 
 #Pegamos las direcciones cortas
-load(paste0(ruta_DataInput,"Doc_Enero_2022.RData"))
-load(paste0(ruta_DataInput,"Acc_Enero_2022.RData"))
-load(paste0(ruta_DataInput,"Inf_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Doc_Febrero_2022.RData"))
+load(paste0(ruta_DataInput,"Acc_Febrero_2022.RData"))
+load(paste0(ruta_DataInput,"Inf_Febrero_2022.RData"))
 #Carga BD Excel=============================
 if(2==2){
   #---CARGAMOS RESULTADOS DE SUPERVISION------
   #DF_RES<- read_excel("Insumos/INFORMES/Informes_Diciembre.xlsx", skip = 3) #Oficina
-  DF_RES<- read_excel(paste0(ruta_DataInput,"Informes/2022/Informes_Enero_2022.xlsx"), skip = 3) 
+  DF_RES<- read_excel(paste0(ruta_DataInput,"Informes/2022/Informes_Febrero_2022.xlsx"), skip = 3,
+                      col_types = c( "numeric","text","date","text","date","text","text","date","text","date",
+                                     "text","text","text","text","text","text","text","text","text","text",
+                                     "numeric","numeric","numeric","numeric","numeric","numeric","text","text","text","text",
+                                     "text","numeric","numeric","numeric","text","text","text","text","date","text",
+                                     "text","date","date","text","date","text","date","text","text","text",
+                                     "text","date","text","text","text","text")) 
   
   #Limpieza
   DF_RES<- DF_RES %>%
@@ -53,7 +59,7 @@ if(2==2){
 
 #Meses Evaluados ========
 #EVALUACION<- "ENERO"#|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO|SETIEMBRE|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE"
-EVALUACION<- as.Date("2022-01-31")
+EVALUACION<- as.Date("2022-02-28")
 #Estado de Informes INAPS==========================
 if(3==3){ 
   RECOM_INAPS<- Informes_R%>%
@@ -145,8 +151,8 @@ if(3==3){
 
 
 #Guardamos Excel para Boletin==========================
-save(INF_CONSOL_BOLETIN, file = paste0(ruta_DatOutput,"BDInf_Enero_2022.RData"))
-load(paste0(ruta_DatOutput,"BDInf_Enero_2022.RData"))
+save(INF_CONSOL_BOLETIN, file = paste0(ruta_DatOutput,"BDInf_Febrero_2022.RData"))
+load(paste0(ruta_DatOutput,"BDInf_Febrero_2022.RData"))
 
 
 #Informes por mes====================================
@@ -314,7 +320,7 @@ addWorksheet(wb1,"BD")
 addWorksheet(wb1,"REPORTE")
 #-- Agrgamos general --
 writeData(wb1,"BD","1. CONSOLIDADO DE INFORMES",startRow = 1 ,startCol = "A")
-writeData(wb1,"BD",INF_CONSOL_BOLETIN, startRow = 3 ,startCol = "A", na.string = "") #se debe revisar
+#writeData(wb1,"BD",INF_CONSOL_BOLETIN, startRow = 3 ,startCol = "A", na.string = "") #se debe revisar
 #-- Agregamos tablas
 #Tabla 01
 writeData(wb1,"REPORTE",df.list[[1]],startRow = df.row$Posi[[1]] ,startCol = "A")
@@ -336,12 +342,9 @@ writeDataTable(wb1,"REPORTE",df.list[[10]], startRow = df.row$Posi[[10]] ,startC
 #writeDataTable(wb1,"REPORTE",df.list[[12]], startRow = df.row$Posi[[12]] ,startCol = "A")
 
 #-- Guardamos --
-saveWorkbook(wb1,paste0(ruta_BolOutput,"Informes_Enero_2022.xlsx"), overwrite = TRUE)
+saveWorkbook(wb1,paste0(ruta_BolOutput,"Informes_Febrero_2022.xlsx"), overwrite = TRUE)
 
 }
 
-#write.csv(INF_CONSOL_BOLETIN,file = "Informes_FebreroParcial_2022a.csv", row.names = TRUE, na="")
-
-
-#xlsx::write.xlsx(INF_CONSOL_BOLETIN ,"Informes_Diciembre2021a.xlsx",sheetName = "BD", append = TRUE) #Se debe revisar
+write.csv(INF_CONSOL_BOLETIN,file = paste0(ruta_BolOutput,"Informes_Febrero_2022.csv"), row.names = TRUE, na="")
 

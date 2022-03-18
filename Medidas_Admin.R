@@ -10,9 +10,9 @@ ruta_DatOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/D
 ruta_descargas<- "C:/Users/jach_/Downloads/"
 
 #Pegamos las direcciones cortas
-load(paste0(ruta_DataInput,"Doc_Enero_2022.RData"))
-load(paste0(ruta_DataInput,"Acc_Enero_2022.RData"))
-load(paste0(ruta_DataInput,"Inf_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Doc_Febrero_2022.RData"))
+load(paste0(ruta_DataInput,"Acc_Febrero_2022.RData"))
+load(paste0(ruta_DataInput,"Inf_Febrero_2022.RData"))
 
 #Usuario
 gs4_user()
@@ -107,11 +107,11 @@ MEDIDAS_ADM2<- MEDIDAS_ADM2 %>%
   select(ID:FECHA_ACTUAL)
 
 #10--GUARDAMOS LA BD FINAL----
-save(MEDIDAS_ADM2, file = paste0(ruta_DatOutput,"Med_Enero_2022.RData"))
-load(paste0(ruta_DatOutput,"Med_Enero_2022.RData"))
+save(MEDIDAS_ADM2, file = paste0(ruta_DatOutput,"Med_Febrero_2022.RData"))
+load(paste0(ruta_DatOutput,"Med_Febrero_2022.RData"))
 
 #Meses Evaluados ========
-EVALUACION<- as.Date("2022-01-31")
+EVALUACION<- as.Date("2022-02-28")
 
 #11--REPORTE CSEP-----
 REP_CSEP<- MEDIDAS_ADM2 %>%
@@ -161,7 +161,7 @@ colnames(REP_CSIG)<- c("NRO","COD_MED","COD_OEFA","N_EXPEDIENTE","CUC","RUC","ME
                        "INTERP_RECURSO","MED_FIRME","RECONSIDERA","FEC_RECONSIDERA","RESOL_RECONSIDERA","APELACION","FEC_APELA","RESOL_TFA",
                        "REVOCA_CONFIR_NULA","OBS_COORD","PUBLICAR","FEC_ACTUAL")
 #EXPORTAR PARA CSIG------
-#write.xlsx(REP_CSIG,"C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/CSIG/BASE DE DATOS MEDIDAS ADMINISTRATIVAS - GENERAL 31.01.2022(CSIG).xlsx", startRow=1, colNames=TRUE)
+#write.xlsx(REP_CSIG,"C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/CSIG/BASE DE DATOS MEDIDAS ADMINISTRATIVAS - GENERAL 28.02.2022(CSIG).xlsx", startRow=1, colNames=TRUE)
 
 
 #---REPORTES PARA MEDIDAS ADMIN----
@@ -368,7 +368,7 @@ writeDataTable(wb,"REPORTE", ESTRATEGIAS,
 addStyle(wb,sheet = "BD",style = s1 ,rows = c(1),cols = c(1:10))
 #Guarda
 #---------
-saveWorkbook(wb, paste0(ruta_BolOutput,"Medidas_Enero_2022.xlsx"), overwrite = TRUE)
+saveWorkbook(wb, paste0(ruta_BolOutput,"Medidas_Febrero_2022.xlsx"), overwrite = TRUE)
 
 }
 

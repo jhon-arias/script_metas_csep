@@ -1,11 +1,109 @@
-#-------------------- CARGAR PAQUETES
-library(easypackages)
-pqt<- c("tidyverse","readxl","stringi","openxlsx","lubridate","bizdays" ,"janitor", "knitr","formattable","shadowtext","DT")
-libraries(pqt)
+#-----------------------------------------------------
+# Cargamos paquetes y archivos
+#-----------------------------------------------------
+{
+  library(easypackages)
+  pqt<- c("googlesheets4","gargle","tidyverse","readxl","stringi","openxlsx","lubridate","bizdays" ,"janitor", "knitr","formattable","shadowtext","DT")
+  libraries(pqt)
+}
+#-----------------------------------------------------
+#Creamos rutas para no exceder la ruta de los archivos
+#-----------------------------------------------------
+{
+  ruta_DataInput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data/2022/"
+  ruta_BolOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/"
+  ruta_DatOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/Data/"
+  ruta_descargas<- "C:/Users/jach_/Downloads/"
+}
+#-----------------------------------------------------
+#Consultar data del Drive
+#-----------------------------------------------------
+#Usuario
+gs4_user()
 
-#-------------------- PALETA DE COLORES Y TEMA
+#Configurar autorizaciones
+gs4_auth(
+  email = "jarias@oefa.gob.pe",
+  token = "Gargle2.0"
+)
+
+#BUscar archivos con informacion 
+archivos<- gs4_find("FINAL", n_max=500) %>% filter(str_detect(name,"ENERO|FEBRERO")) %>% arrange(name)
+
+#Confirmas permisos
+1
+
+#-----------------------------------------------------
+#Importar datos de RD-RSD y Limpieza 
+#-----------------------------------------------------
+{
+  DFAI_EXP<- as.data.frame(read_sheet(ss=archivos$id[1], sheet = "RSDRD", range = "A1:V",
+                                      col_types = "cccDcccDcccccccccciccc"))
+  #LImpieza RD y RSD
+  DFAI_EXP<- DFAI_EXP %>% filter(!is.na(EXPEDIENTE),!str_detect(SECTOR,"SECTOR")) %>%
+    mutate(COORDINACION =  case_when(
+      str_detect(SECTOR,"MIN") ~ "CMIN", str_detect(SECTOR,"HIDR") ~ "CHID", str_detect(SECTOR,"ELECT") ~ "CELE",
+      str_detect(SECTOR,"INDUS") ~ "CIND", str_detect(SECTOR,"PES") ~ "CPES", str_detect(SECTOR,"AGRIC") ~ "CAGR",
+      str_detect(SECTOR,"CONSUL") ~ "CCAM", str_detect(SECTOR,"RESIDU") ~ "CRES")) %>%
+    rename("RAZON" = ADMINISTRADO, "UNIDAD" = `UNIDAD FISCALIZABLE`, "TIPO" = TIPO_RES, "ANO_RPTE" = `AÑO_RPTE`) %>%
+    mutate(FECHA_RESOL =  as.Date(FECHA_RESOL),FE_INI_SUP = as.Date(FE_INI_SUP),ANO_SUP =  year(FE_INI_SUP))
+  
+  save(DFAI_EXP,file = paste0(ruta_DatOutput,"DFAIExp_Enero_2022.RData"))
+}
+
+#-----------------------------------------------------
+#Importar datos de Medidas Correctivas y Limpieza 
+#-----------------------------------------------------
+{
+  DFAI_CORR<- as.data.frame(read_sheet(ss=archivos$id[1], sheet = "MEDIDAS CORRECTIVAS", range = "A1:Q",
+                                       col_types = "cccDiccDcccDccicc"))
+  #Limpieza Correctivas
+  DFAI_CORR<- DFAI_CORR%>% filter(!is.na(EXPEDIENTE),!str_detect(SECTOR,"SECTOR")) %>%
+    rename("ADMIN" = ADMINISTRADO, "ANO_RPTE"= `AÑO_RPTE`) %>%
+    mutate(FECHA_INI_SUP = as.Date(FECHA_INI_SUP),
+           FECHA_INF = as.Date(FECHA_INF),
+           FECHA_RESOL = as.Date(FECHA_RESOL),
+           ANO_RPTE = year(FECHA_RESOL),
+           INF_SFAP_SFEM = if_else(is.na(INF_SFAP_SFEM), RESOL_DIRECT,INF_SFAP_SFEM),
+           FECHA_INF = if_else(is.na(FECHA_INF),FECHA_RESOL, FECHA_INF))
+  
+  save(DFAI_CORR,file = paste0(ruta_DatOutput,"DFAICorr_Enero_2022.RData"))
+}
+
+#-----------------------------------------------------
+#Importar datos del Stock y Limpieza 
+#-----------------------------------------------------
+{
+  DFAI_STOCK<- as.data.frame(read_sheet(ss=archivos$id[1], sheet = "STOCK", range = "A1:H",
+                                        col_types = "iciccccc"))
+  
+  DFAI_STOCK<- DFAI_STOCK %>% filter(!is.na(DOCUMENTO),!str_detect(SECTOR,"SECTOR"),
+                                     !str_detect(PNDNT_TRAMITADO,"CONCLUIDO|APLICA")) 
+  
+  save(DFAI_STOCK,file = paste0(ruta_DatOutput,"DFAIStck_Enero_2022.RData"))
+}
+
+
+#Finalizar conexion
+gs4_deauth()
+
+
+#---------------------------------------------
+# Consultamos la data desde la Fuente limpia
+#---------------------------------------------
+load(paste0(ruta_DatOutput,"DFAIExp_Enero_2022.RData"))
+load(paste0(ruta_DatOutput,"DFAICorr_Enero_2022.RData"))
+load(paste0(ruta_DatOutput,"DFAIStck_Enero_2022.RData"))
+#Metas
+load("C:/Users/jach_/OneDrive/Documentos/ShinyApp/Planefa2021/Progr2022.RData")
+
+
+#---------------------------------------------
+# Paleta de colores y tema
+#---------------------------------------------
 
 #Colores institucionales
+{
 OEFA.AZUL1<-c("#144AA7")
 OEFA.AZUL2<-c("#1d85bf")
 OEFA.TURQUEZA<-c("#0BC7E0")
@@ -29,44 +127,12 @@ TEMA=    theme(panel.background = element_blank(),
                axis.line = element_line(colour = OEFA.GRIS),
                text=element_text(size=12),
                plot.caption = element_text(hjust = 0),
-               axis.title.y.right = element_text( angle = 90)
-)
+               axis.title.y.right = element_text( angle = 90))
+}
 
-
-
-#-------------------- IMPORTAR ARCHIVOS
-DFAI_EXP<- read_excel("C:/Users/jach_/Downloads/DFAI OCTUBRE 2021.xlsx", sheet = "RSDRD", skip = 0) %>% filter(!is.na(EXPEDIENTE)) %>%
-  rename("COORDINACION" = `COORDINACIÓN`, "RAZON" = ADMINISTRADO, "UNIDAD" = `UNIDAD FISCALIZABLE`, "TIPO" = TIPO_RES, "ANO_RPTE" = `AÑO_RPTE`) %>%
-  mutate(FECHA_RESOL =  as.Date(FECHA_RESOL),
-         FE_INI_SUP = as.Date(FE_INI_SUP),
-         ANO_SUP =  year(FE_INI_SUP))
-save(DFAI_EXP,file = "C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data2021/Agosto(gestion)/DFAI_Agosto_2021.RData")
-
-DFAI_CORR<- read_excel("C:/Users/jach_/Downloads/DFAI OCTUBRE 2021.xlsx", sheet = "MEDIDAS CORRECTIVAS", skip = 0) %>% filter(!is.na(EXPEDIENTE)) %>%
-  rename("ADMIN" = ADMINISTRADO, "ANO_RPTE"= `AÑO_RPTE`) %>%
-  mutate(FECHA_INI_SUP = as.Date(FECHA_INI_SUP),
-         FECHA_INF = as.Date(FECHA_INF),
-         FECHA_RESOL = as.Date(FECHA_RESOL),
-         ANO_RPTE = year(FECHA_RESOL),
-         INF_SFAP_SFEM = if_else(is.na(INF_SFAP_SFEM), RESOL_DIRECT,INF_SFAP_SFEM),
-         FECHA_INF = if_else(is.na(FECHA_INF),FECHA_RESOL, FECHA_INF))
-
-save(DFAI_CORR,file = "C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data2021/Agosto(gestion)/DFAImc_Agosto_2021.RData")
-
-DFAI_STOCK<- read_excel("C:/Users/jach_/Downloads/DFAI OCTUBRE 2021.xlsx", sheet = "STOCK", skip = 0)%>% filter(!is.na(DOCUMENTO)) %>%
-  rename("ESTADO" = `ESTADO...4`, "RESOL" = `RESOL_CONCLUCIÓN` , "ESTADO_2" = `ESTADO...13`)
-
-save(DFAI_STOCK,file = "C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data2021/Agosto(gestion)/DFAIstk_Agosto_2021.RData")
-
-#-------------------- CONSULTAMOS ARCHIVOS
-load("C:/Users/jach_/OneDrive/Documentos/ShinyApp/Planefa2021/Progr2021.RData")
-#-----
-load("C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data2021/Diciembre/DFAI_Diciembre_2021.RData")
-load("C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data2021/Diciembre/DFAImc_Diciembre_2021.RData")
-load("C:/Users/jach_/OneDrive/Documentos/OEFA/Inputs/Data2021/Diciembre/DFAIstk_Diciembre_2021.RData")
 
 #-------------------- LIMPIESA DE DATOS
-FECHA_EVALUADA<- c("2021-12-31")
+FECHA_EVALUADA<- c("2022-01-31")
 
 
 #5---
@@ -93,7 +159,6 @@ DFAI_EXP<- DFAI_EXP %>%
 #6---
 DFAI_CORR <- DFAI_CORR %>%
   filter(!is.na(INF_SFAP_SFEM)) %>%
-  #rename("MES_RPT" = MES) %>%
   mutate_if(is.character, function(X){toupper(X)})%>%
   mutate(RESULTADO = stri_trans_general(RESULTADO,"Latin-ASCII")) %>%
   mutate(SECTOR1= case_when(
@@ -132,7 +197,7 @@ DFAI_STOCK<- DFAI_STOCK %>%
 
 #-------------------- GENERACION DE TABLAS
 EXP.DFAI<- DFAI_EXP %>%
-  filter(FECHA_RESOL>= as.Date("2021-01-01"),
+  filter(FECHA_RESOL>= as.Date("2022-01-01"),
          FECHA_RESOL<= FECHA_EVALUADA)%>%
   rename(MES=MES_META) %>%
   group_by(SECTOR1, MES) %>% 
@@ -140,7 +205,7 @@ EXP.DFAI<- DFAI_EXP %>%
   rename(SECTOR=SECTOR1)
 
 CORR.DFAI<- DFAI_CORR %>%
-  filter(FECHA_RESOL>= as.Date("2021-01-01"),
+  filter(FECHA_RESOL>= as.Date("2022-01-01"),
          FECHA_RESOL<= FECHA_EVALUADA)%>%
   rename(MES=MES_META) %>%
   mutate(SECTOR= "MC") %>%
@@ -151,14 +216,16 @@ EXP.CULM<- bind_rows(EXP.DFAI,CORR.DFAI) %>%
   rename(EJECUTADO = NRO)
 
 #Seguimiento Metas DFAI
-META.DFAI<- Progr2021 %>%
-  filter(str_detect(FUNCION,"FISCALIZA")) %>%
-  left_join(EXP.CULM) %>%
+META.DFAI<- EXP.CULM %>% 
+  left_join(
+    Meta_Planefa_2022 %>%
+      filter(str_detect(FUNCION,"FISCALIZA"))
+  ) %>%
   replace(is.na(.),0)
 
 #Detalle de Metas DFAI
 EXP.DETALL<- DFAI_EXP %>%
-  filter(FECHA_RESOL>= as.Date("2021-01-01"),
+  filter(FECHA_RESOL>= as.Date("2022-01-01"),
          FECHA_RESOL<= FECHA_EVALUADA)%>%
   rename(MES=MES_META) %>%
   group_by(SECTOR2, MES) %>% 
@@ -166,7 +233,7 @@ EXP.DETALL<- DFAI_EXP %>%
   rename(SECTOR=SECTOR2)
 
 COR.DETALL<- DFAI_CORR %>%
-  filter(FECHA_RESOL>= as.Date("2021-01-01"),
+  filter(FECHA_RESOL>= as.Date("2022-01-01"),
          FECHA_RESOL<= FECHA_EVALUADA) %>%
   rename(MES=MES_META) %>%
   mutate(SECTOR="MC")%>%
@@ -179,7 +246,7 @@ META.DETALL<- EXP.DETALL %>%
 
 #Resultado de los expedientes DFAI
 EXP.RESUL<- DFAI_EXP %>%
-  filter(FECHA_RESOL>= as.Date("2021-01-01"),
+  filter(FECHA_RESOL>= as.Date("2022-01-01"),
          FECHA_RESOL<= FECHA_EVALUADA)%>%
   rename(MES=MES_META) %>%
   group_by(SECTOR2,TIPO, MES) %>% 
@@ -188,7 +255,7 @@ EXP.RESUL<- DFAI_EXP %>%
          RESULTADO=TIPO)
 
 COR.RESUL<- DFAI_CORR %>%
-  filter(FECHA_RESOL>= as.Date("2021-01-01"),
+  filter(FECHA_RESOL>= as.Date("2022-01-01"),
          FECHA_RESOL<= FECHA_EVALUADA)%>%
   rename(MES=MES_META) %>%
   mutate(SECTOR = "MC") %>%
@@ -202,7 +269,7 @@ META.RESUL<- EXP.RESUL %>%
 
 #Año de supervisión de expedientes DFAI
 EXP.YEAR<- DFAI_EXP %>%
-  filter(FECHA_RESOL>= as.Date("2021-01-01"),
+  filter(FECHA_RESOL>= as.Date("2022-01-01"),
          FECHA_RESOL<= FECHA_EVALUADA)%>%
   rename(MES=MES_META) %>%
   group_by(SECTOR2,ANO_SUP, MES) %>% 
@@ -210,7 +277,7 @@ EXP.YEAR<- DFAI_EXP %>%
   rename(SECTOR=SECTOR2)
 
 COR.YEAR<- DFAI_CORR %>%
-  filter(FECHA_RESOL>= as.Date("2021-01-01"),
+  filter(FECHA_RESOL>= as.Date("2022-01-01"),
          FECHA_RESOL<= FECHA_EVALUADA)%>%
   rename(MES=MES_META) %>%
   mutate(SECTOR = "MC") %>%
@@ -223,7 +290,7 @@ META.YEAR<- EXP.YEAR %>%
 
 #Motivos de no inicio de supervisión de expedientes DFAI
 META.MOTIVO<- DFAI_EXP %>%
-  filter(FECHA_RESOL>= as.Date("2021-01-01"),
+  filter(FECHA_RESOL>= as.Date("2022-01-01"),
          FECHA_RESOL<= FECHA_EVALUADA)%>%
   rename(MES=MES_META) %>%
   filter(str_detect(TIPO,"ARCHIVO|NO INICIO")) %>%
@@ -245,8 +312,8 @@ STOCK.DFAI<- DFAI_STOCK %>%
 #11.1 Expedientes concluidos DFAI-----------------------------------------------
 Graph_1<-  META.DFAI %>%
     group_by(SECTOR) %>%
-    summarise(META = sum(META,na.rm = TRUE),
-              EJECUTADO=sum(EJECUTADO, na.rm = TRUE),.groups = 'drop') %>%
+    summarise(META = sum(`M-2022-0`,na.rm = TRUE),
+              EJECUTADO=sum(EJECUTADO, na.rm = TRUE),.groups = 'drop_last') %>%
     mutate(PORCENTAJE =round((EJECUTADO/META)*100,digits = 1)) %>%
     filter(!is.infinite(PORCENTAJE),!is.na(PORCENTAJE)) %>%
     mutate(SECTOR = factor(SECTOR,levels = c("MIN","HID","ELE","IND","PES","AGR","INF","MC"))) %>%
@@ -278,7 +345,7 @@ Graph_1<-  META.DFAI %>%
 Tabla_1<- META.DFAI %>% 
   mutate(SECTOR = factor(SECTOR,levels = c("MIN","HID","ELE","IND","PES","AGR","INF","MC"))) %>%
   group_by(SECTOR) %>%
-  summarise(META = sum(META,na.rm = TRUE), EJECUTADO=sum(EJECUTADO, na.rm = TRUE),.groups = 'drop') %>%
+  summarise(META = sum(`M-2022-0`,na.rm = TRUE), EJECUTADO=sum(EJECUTADO, na.rm = TRUE),.groups = 'drop') %>%
   mutate(PORCENTAJE =paste(round((EJECUTADO/META)*100,digits = 1),"%",sep = " ")) %>%
   rename("Subsector" = SECTOR,"Meta" = META,"Ejecutado" = EJECUTADO,"Porcentaje" = PORCENTAJE)
 
@@ -395,8 +462,6 @@ Tabla_6<- STOCK.DFAI %>%
 
 
 if(5==5){
-setwd("C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/")
-
 #-- Generamos lo lugares para exportar
   #lista de BD  
   df.list <- list(
@@ -470,6 +535,6 @@ print(Graph_3)
 insertPlot(wb1, "REPORTE", xy = c("N", 50), width = 20, height = 10, fileType = "png", units = "cm" )
 
 #-- Guardamos --
-saveWorkbook(wb1,"DFAIExpedientes_Diciembre2021.xlsx", overwrite = TRUE)
+saveWorkbook(wb1,file = paste0(ruta_BolOutput,"DFAIExpedientes_Enero_2022.xlsx"), overwrite = TRUE)
 
 }
