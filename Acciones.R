@@ -11,9 +11,9 @@ ruta_BolOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/"
 ruta_DatOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/Data/"
 ruta_descargas<- "C:/Users/jach_/Downloads/"
 #Cargamos la data de acciones y docuemntos
-load(paste0(ruta_DataInput,"Doc_Enero_2022.RData"))
-load(paste0(ruta_DataInput,"Acc_Enero_2022.RData"))
-load(paste0(ruta_DataInput,"Inf_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Doc_Febrero_2022.RData"))
+load(paste0(ruta_DataInput,"Acc_Febrero_2022.RData"))
+load(paste0(ruta_DataInput,"Inf_Febrero_2022.RData"))
 # Revisión de carga de documentos.
 CargaDocs_R2 <- CargaDocs_R %>%
   #filter(FEFIN>=as.Date("2018-01-01"))%>%
@@ -27,7 +27,7 @@ CargaDocs_R2 <- CargaDocs_R %>%
 #ACCIONES E NFORMES DESDE 2018 ========================
 Acciones_R2 <- Acciones_R %>%
   filter(FEFIN >= as.Date("2021-01-01")  , 
-         FEFIN <=  as.Date("2021-01-31")) %>%
+         FEFIN <=  as.Date("2021-02-28")) %>%
   left_join(CargaDocs_R2) %>%
   #left_join(Informes_R) %>%
   mutate(
@@ -298,7 +298,6 @@ if(3==3) {
 
 #Exportamos reporte Boletin=============
 if(5==5){
-  setwd("C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022")
   #Creamos Libro
   wb<- createWorkbook()
   modifyBaseFont(wb,fontSize = 10,fontName = "calibri", fontColour = "blue") # Solamente Aplica para writeData
@@ -324,7 +323,6 @@ if(5==5){
   writeDataTable(wb,"Reporte_Meta", TOTAL_SUP,startRow = 68 ,startCol = "A")
   
   #Guardamos data
-  saveWorkbook(wb, paste0(ruta_BolOutput,"Acciones_Enero_2022.xlsx"), overwrite = TRUE)
+  saveWorkbook(wb, paste0(ruta_BolOutput,"Acciones_Febrero_2022.xlsx"), overwrite = TRUE)
 }
 
-#write.csv(Acciones_R2,file = "Acciones_Diciembre2021a.csv", row.names = TRUE, na="")
