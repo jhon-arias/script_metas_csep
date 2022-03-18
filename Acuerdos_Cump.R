@@ -10,9 +10,9 @@ ruta_DatOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/D
 ruta_descargas<- "C:/Users/jach_/Downloads/"
 
 #Pegamos las direcciones cortas
-load(paste0(ruta_DataInput,"Doc_Enero_2022.RData"))
-load(paste0(ruta_DataInput,"Acc_Enero_2022.RData"))
-load(paste0(ruta_DataInput,"Inf_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Doc_Febrero_2022.RData"))
+load(paste0(ruta_DataInput,"Acc_Febrero_2022.RData"))
+load(paste0(ruta_DataInput,"Inf_Febrero_2022.RData"))
 
 
 #Usuario
@@ -127,8 +127,8 @@ ADICIONALES<- bind_rows(file.list3) %>%
 
 
 #Guardamos la data
-save(ACUERDOS, file = paste0(ruta_DatOutput,"Acu_Enero_2020.RData"))
-load(paste0(ruta_DatOutput,"Acu_Enero_2020.RData"))
+save(ACUERDOS, file = paste0(ruta_DatOutput,"Acu_Febrero_2020.RData"))
+load(paste0(ruta_DatOutput,"Acu_Febrero_2020.RData"))
 
 #Guardamos el reporte
 if(1==1){
@@ -150,6 +150,6 @@ if(1==1){
             , startRow = 1 ,startCol = "A", colNames = FALSE)
   writeDataTable(wb,"ADICIONAL",ADICIONALES,startRow = 2,startCol = "A")
   
-  saveWorkbook(wb, paste0(ruta_BolOutput,"Acuerdos_Enero_2022.xlsx"), overwrite = TRUE)
+  saveWorkbook(wb, paste0(ruta_BolOutput,"Acuerdos_Febrero_2022.xlsx"), overwrite = TRUE)
 }
 
