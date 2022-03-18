@@ -10,14 +10,14 @@ ruta_DatOutput<- "C:/Users/jach_/OneDrive/Documentos/OEFA/Outputs/Boletin/2022/D
 ruta_descargas<- "C:/Users/jach_/Downloads/"
 
 #Pegamos las direcciones cortas
-load(paste0(ruta_DataInput,"Doc_Enero_2022.RData"))
-load(paste0(ruta_DataInput,"Acc_Enero_2022.RData"))
-load(paste0(ruta_DataInput,"Inf_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Doc_Febrero_2022.RData"))
+load(paste0(ruta_DataInput,"Acc_Febrero_2022.RData"))
+load(paste0(ruta_DataInput,"Inf_Febrero_2022.RData"))
 
 #Cargamos las emergencias
-load(paste0(ruta_DataInput,"Emergencias_Enero_2022.RData"))
+load(paste0(ruta_DataInput,"Emergencias_Febrero_2022.RData"))
 
-Evaluacion <- "2022-01-31" # Cambiar la fecha de corte
+Evaluacion <- "2022-02-28" # Cambiar la fecha de corte
 #--
 Emergencias<- Emergencias_R %>%
   left_join( Acciones_R %>% select(TXCOORDINACION, TXCUC) %>% rename("TX_ACCSUP"=TXCUC)) %>%
@@ -49,7 +49,7 @@ Reporte_all
 
 #Reporte de INAF Inmediatas y de verificacion---------------
 Reporte_inmediatas<- Emergencias %>%
-  filter(FE_FECHA_FIN >= as.Date("2022-01-01"), #Solo 2021
+  filter(FE_FECHA_FIN >= as.Date("2022-01-01"), #Solo 2022
          str_detect(TX_TIPO_ATENCION, "VERIF"),
          str_detect(TX_VERIFICACION,"^INMEDIATA")) %>%
   group_by(TXCOORDINACION) %>%
@@ -113,15 +113,15 @@ if(1==1){
             , startRow = 1 ,startCol = "A", colNames = FALSE)
   writeDataTable(wb,"BD",Emergencias,startRow = 2,startCol = "A")
   #Tabla 2
-  writeData(wb,"REPORTE",as.data.frame(paste(c("1. REPORTE CONSOLIDADO EMERGENCIAS ATENDIDAS ENERO"),toupper(months(as.Date(Evaluacion))),"2021", sep = "-"))
+  writeData(wb,"REPORTE",as.data.frame(paste(c("1. REPORTE CONSOLIDADO EMERGENCIAS ATENDIDAS ENERO"),toupper(months(as.Date(Evaluacion))),"2022", sep = "-"))
             , startRow = 1 ,startCol = "A", colNames = FALSE)
   writeDataTable(wb,"REPORTE",Reporte_all,startRow = 2,startCol = "A")
   #Tabla 3
-  writeData(wb,"REPORTE",as.data.frame(paste(c("2. REPORTE CONSOLIDADO EMERGENCIAS ATENDIDAS - VERIFICACION Y PRINCIPALES ENERO "),toupper(months(as.Date(Evaluacion))),"2021", sep = "-"))
+  writeData(wb,"REPORTE",as.data.frame(paste(c("2. REPORTE CONSOLIDADO EMERGENCIAS ATENDIDAS - VERIFICACION Y PRINCIPALES ENERO "),toupper(months(as.Date(Evaluacion))),"2022", sep = "-"))
             , startRow = 15 ,startCol = "A", colNames = FALSE)
   writeDataTable(wb,"REPORTE",Reporte_inmediatas,startRow = 16,startCol = "A")
 
-  saveWorkbook(wb, paste0(ruta_BolOutput,"Emergencias_Enero_2022.xlsx"), overwrite = TRUE)
+  saveWorkbook(wb, paste0(ruta_BolOutput,"Emergencias_Febrero_2022.xlsx"), overwrite = TRUE)
 }
 
 
